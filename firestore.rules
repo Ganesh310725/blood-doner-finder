@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email == "ganesh276c@gmail.com")
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // USERS: Private user records containing sensitive personal info
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == userId &&
+                       request.resource.data.id == userId;
+      allow update: if (isOwner(userId) &&
+                        request.resource.data.id == userId &&
+                        request.resource.data.role == resource.data.role) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // DONORS: Public donor discovery directory (strictly non-PII: blood group, city, availability)
+    match /donors/{donorId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.auth.uid == donorId &&
+                       request.resource.data.userId == donorId;
+      allow update: if isOwner(donorId) || isAdmin();
+      allow delete: if isOwner(donorId) || isAdmin();
+
+      // Sub-collection: Past blood donation logs
+      match /donationHistory/{donationId} {
+        allow read, write: if isOwner(donorId) || isAdmin();
+      }
+    }
+
+    // BLOOD REQUESTS: Community blood requirements
+    match /bloodRequests/{requestId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.resource.data.receiverId == request.auth.uid;
+      allow update: if (isSignedIn() && resource.data.receiverId == request.auth.uid) || isAdmin();
+      allow delete: if (isSignedIn() && resource.data.receiverId == request.auth.uid) || isAdmin();
+    }
+
+    // CONTACT REQUESTS: Private consent-based connection between receiver and donor
+    match /contactRequests/{requestId} {
+      allow get: if isSignedIn() && (
+        resource.data.donorId == request.auth.uid ||
+        resource.data.receiverId == request.auth.uid ||
+        isAdmin()
+      );
+      allow list: if isSignedIn() && (
+        resource.data.donorId == request.auth.uid ||
+        resource.data.receiverId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && request.resource.data.receiverId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.donorId == request.auth.uid ||
+        resource.data.receiverId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // FEEDBACK & SUSPICIOUS REPORTING
+    match /feedbacks/{feedbackId} {
+      allow create: if true;
+      allow get, list, update, delete: if isAdmin();
+    }
+
+    // ADMINS
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

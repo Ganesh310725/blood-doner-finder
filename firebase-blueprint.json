@@ -1,0 +1,164 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Private profile of registered users containing account information and contact data",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 128 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["donor", "receiver", "admin"] },
+        "phone": { "type": "string", "maxLength": 20 },
+        "city": { "type": "string", "maxLength": 100 },
+        "pinCode": { "type": "string", "maxLength": 10 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "email", "fullName", "role", "city", "pinCode"]
+    },
+    "Donor": {
+      "title": "Public Donor Listing",
+      "description": "Publicly searchable voluntary blood donor profile (strictly excludes private phone numbers and street addresses)",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "bloodGroup": { "type": "string", "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] },
+        "city": { "type": "string", "maxLength": 100 },
+        "pinCode": { "type": "string", "maxLength": 10 },
+        "age": { "type": "number" },
+        "gender": { "type": "string", "maxLength": 20 },
+        "isAvailable": { "type": "boolean" },
+        "isPublicConsent": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["available", "resting", "unavailable"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "fullName", "bloodGroup", "city", "pinCode", "isAvailable", "isPublicConsent"]
+    },
+    "DonationRecord": {
+      "title": "Past Blood Donation Record",
+      "description": "Log of a past blood donation completed by the donor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "donorId": { "type": "string", "maxLength": 128 },
+        "donationDate": { "type": "string", "maxLength": 30 },
+        "hospitalName": { "type": "string", "maxLength": 150 },
+        "hospitalLocation": { "type": "string", "maxLength": 200 },
+        "units": { "type": "number" },
+        "componentType": { "type": "string", "enum": ["Whole Blood", "Platelets", "Plasma", "Red Blood Cells"] },
+        "notes": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["donorId", "donationDate", "hospitalName"]
+    },
+    "BloodRequest": {
+      "title": "Blood Requirement Request",
+      "description": "Patient blood requirement posted by registered receiver",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "receiverId": { "type": "string", "maxLength": 128 },
+        "receiverName": { "type": "string", "maxLength": 100 },
+        "receiverPhone": { "type": "string", "maxLength": 20 },
+        "receiverEmail": { "type": "string", "format": "email", "maxLength": 128 },
+        "patientBloodGroup": { "type": "string", "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] },
+        "unitsNeeded": { "type": "number" },
+        "hospitalName": { "type": "string", "maxLength": 150 },
+        "hospitalLocation": { "type": "string", "maxLength": 200 },
+        "city": { "type": "string", "maxLength": 100 },
+        "pinCode": { "type": "string", "maxLength": 10 },
+        "requiredDate": { "type": "string", "maxLength": 30 },
+        "urgency": { "type": "string", "enum": ["Emergency", "Urgent", "Normal"] },
+        "additionalNotes": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["Pending", "Donors contacted", "Fulfilled", "Cancelled"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["receiverId", "receiverName", "patientBloodGroup", "unitsNeeded", "hospitalName", "city", "pinCode", "urgency", "status"]
+    },
+    "ContactRequest": {
+      "title": "Donor Contact Request",
+      "description": "Request sent from receiver to donor requesting blood donation contact",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "donorId": { "type": "string", "maxLength": 128 },
+        "donorName": { "type": "string", "maxLength": 100 },
+        "receiverId": { "type": "string", "maxLength": 128 },
+        "receiverName": { "type": "string", "maxLength": 100 },
+        "receiverEmail": { "type": "string", "format": "email", "maxLength": 128 },
+        "receiverPhone": { "type": "string", "maxLength": 20 },
+        "patientBloodGroup": { "type": "string", "maxLength": 10 },
+        "hospitalName": { "type": "string", "maxLength": 150 },
+        "urgency": { "type": "string", "maxLength": 20 },
+        "message": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["Pending", "Accepted", "Declined"] },
+        "donorPhoneRevealed": { "type": "string", "maxLength": 20 },
+        "donorEmailRevealed": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["donorId", "receiverId", "receiverName", "patientBloodGroup", "hospitalName", "status"]
+    },
+    "Feedback": {
+      "title": "Community Feedback and Report",
+      "description": "User inquiries, feedback, or reports of fraudulent or suspicious activity",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "format": "email", "maxLength": 128 },
+        "subject": { "type": "string", "maxLength": 150 },
+        "message": { "type": "string", "maxLength": 1000 },
+        "category": { "type": "string", "enum": ["General", "Feedback", "Report Suspicious Activity", "Emergency Help"] },
+        "status": { "type": "string", "enum": ["New", "Reviewed", "Resolved"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "email", "subject", "message", "category"]
+    },
+    "Admin": {
+      "title": "Administrator Authority Record",
+      "description": "Authorized administrator record",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores private user account information readable and editable only by the owner or admin"
+    },
+    "/donors/{donorId}": {
+      "schema": { "$ref": "#/entities/Donor" },
+      "description": "Stores public donor search listings without private phone numbers or street addresses"
+    },
+    "/donors/{donorId}/donationHistory/{donationId}": {
+      "schema": { "$ref": "#/entities/DonationRecord" },
+      "description": "Sub-collection logging past blood donations for a donor"
+    },
+    "/bloodRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/BloodRequest" },
+      "description": "Stores patient blood requests created by receivers"
+    },
+    "/contactRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/ContactRequest" },
+      "description": "Stores direct contact authorization requests between receivers and donors"
+    },
+    "/feedbacks/{feedbackId}": {
+      "schema": { "$ref": "#/entities/Feedback" },
+      "description": "Stores feedback, inquiry submissions, and suspicious listing reports"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Stores system administrator records for verified role-based access"
+    }
+  }
+}

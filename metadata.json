@@ -1,0 +1,6 @@
+{
+  "name": "Blood Donor Finder",
+  "description": "A community-focused healthcare platform connecting voluntary blood donors with patients and families in urgent need.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
